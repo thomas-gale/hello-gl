@@ -1,7 +1,12 @@
 #include <iostream>
 
 #include "glad/glad.h"
+
 #include "GLFW/glfw3.h"
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
 
 int main() {
     // Init
@@ -11,7 +16,9 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "HelloGL", NULL, NULL);
+    int width = 800;
+    int height = 600;
+    GLFWwindow* window = glfwCreateWindow(width, height, "HelloGL", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -25,5 +32,19 @@ int main() {
         return -1;
     }
 
+    // Viewport
+    glViewport(0, 0, width, height);
+
+    // Resize
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    // Render loop
+    while (!glfwWindowShouldClose(window)) {
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // Clean up and quit
+    glfwTerminate();
     return 0;
 }
