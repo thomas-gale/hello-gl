@@ -110,20 +110,37 @@ int main() {
     // --- Put it all together---
 
     // Geom
-    float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f,
-                        0.0f,  0.0f,  0.5f, 0.0f};
+    float vertices[] = {
+        0.5f,  0.5f,  0.0f, // top right
+        0.5f,  -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f,  0.0f  // top left
+    };
+    unsigned int indices[] = {
+        // note that we start from 0!
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
 
-    // 1. Bind Vertex Array object Vertex buffer
-    unsigned int VAO, VBO;
+    // 0. Gen all the handles.
+    unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    // 1. Bind Vertex Array object
     glBindVertexArray(VAO);
 
-    // 2. Copy vertices array into a buffer for OpenGL to use.
+    // 2. Copy vertices array into a vertex buffer for OpenGL to use.
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // 3. Link vertex attribute pointers
+    // 3. Copy our index array into an element buffer for OpenGL to use.
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+                 GL_STATIC_DRAW);
+
+    // 4. Link vertex attribute pointers
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                           (void*)0);
     glEnableVertexAttribArray(0);
@@ -140,7 +157,9 @@ int main() {
         // 4. Draw stuff.
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Draw lines. GL_FILL
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         // Swap buffers and check events.
         glfwSwapBuffers(window);
