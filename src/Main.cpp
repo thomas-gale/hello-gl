@@ -62,11 +62,11 @@ int main() {
 
     // Geom
     float vertices[] = {
-        // Position, colors
-        0.5f,  0.5f,  0.0f, 1.0f, 1.0f, 1.0f, // top right
-        0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-        -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f  // top left
+        // Position, colors, texture
+        0.5f,  0.5f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, // top right
+        0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // bottom left
+        -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f  // top left
     };
     unsigned int indices[] = {
         // note that we start from 0!
@@ -75,9 +75,31 @@ int main() {
     };
 
     // Textures
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Set the texture wrapping/filtering options (on the currently bound
+    // texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load and generate the texture
     int texWidth, texHeight, nrChannels;
     unsigned char* data =
         stbi_load("container.jpg", &texWidth, &texHeight, &nrChannels, 0);
+    if (data) {
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB,
+                     GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+    stbi_image_free(data);
 
     // 0. Gen all the handles.
     unsigned int VAO, VBO, EBO;
@@ -98,14 +120,19 @@ int main() {
                  GL_STATIC_DRAW);
 
     // 4a. Link vertex attribute position pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                           (void*)0);
     glEnableVertexAttribArray(0);
 
     // 4b. Link vertex attribute color pointers
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                           (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // 4c. Link vertex attribute texture coordinates
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                          (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // Render loop
     while (!glfwWindowShouldClose(window)) {
@@ -124,6 +151,7 @@ int main() {
         ourShader.setFloat("mov", std::sin(timeValue) / 2.0f);
 
         // Draw stuff.
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
         glPolygonMode(GL_FRONT_AND_BACK,
                       GL_FILL); // Draw lines. GL_LINE / GL_FILL
