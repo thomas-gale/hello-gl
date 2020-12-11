@@ -1,5 +1,6 @@
 add_subdirectory(glfw)
 add_subdirectory(glad)
+add_subdirectory(glm)
 
 # stb
 add_library(stb stb/stb_include.h) # Arbitary source file to make cmake happy.

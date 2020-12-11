@@ -5,6 +5,7 @@ add_executable(main
 target_link_libraries(main
     glfw
     glad
+    glm
     stb)
 
 configure_file(shaders/vert.glsl vert.glsl COPYONLY)
