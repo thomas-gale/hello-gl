@@ -5,6 +5,9 @@
 
 #include "GLFW/glfw3.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "Shader.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -71,6 +74,11 @@ int main() {
         1, 2, 3  // second triangle
     };
 
+    // Textures
+    int texWidth, texHeight, nrChannels;
+    unsigned char* data =
+        stbi_load("container.jpg", &texWidth, &texHeight, &nrChannels, 0);
+
     // 0. Gen all the handles.
     unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -113,7 +121,7 @@ int main() {
 
         // Move X over time
         float timeValue = glfwGetTime();
-        ourShader.setFloat("mov", std::sin(timeValue)/2.0f);
+        ourShader.setFloat("mov", std::sin(timeValue) / 2.0f);
 
         // Draw stuff.
         glBindVertexArray(VAO);
