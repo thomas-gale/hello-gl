@@ -75,9 +75,11 @@ int main() {
     };
 
     // Textures
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    unsigned int texture1, texture2;
+    glGenTextures(1, &texture1);
+    glGenTextures(2, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
 
     // Set the texture wrapping/filtering options (on the currently bound
     // texture object)
@@ -86,8 +88,11 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // Load and generate the texture
+    // Load and generate the textures
     int texWidth, texHeight, nrChannels;
+
+    // Texture 1
+    glBindTexture(GL_TEXTURE_2D, texture1);
     unsigned char* data =
         stbi_load("container.jpg", &texWidth, &texHeight, &nrChannels, 0);
     if (data) {
@@ -100,6 +105,26 @@ int main() {
         return -1;
     }
     stbi_image_free(data);
+
+    // Texture 2
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    stbi_set_flip_vertically_on_load(true);
+    data = stbi_load("awesomeface.png", &texWidth, &texHeight, &nrChannels, 0);
+    if (data) {
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+    stbi_image_free(data);
+
+    // Set the textures in the shader
+    ourShader.use();
+    ourShader.setInt("ourTexture1", 0);
+    ourShader.setInt("ourTexture2", 1);
 
     // 0. Gen all the handles.
     unsigned int VAO, VBO, EBO;
@@ -143,7 +168,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Enabled shader
+        // Enable shader
         ourShader.use();
 
         // Move X over time
@@ -151,7 +176,12 @@ int main() {
         ourShader.setFloat("mov", std::sin(timeValue) / 2.0f);
 
         // Draw stuff.
-        glBindTexture(GL_TEXTURE_2D, texture);
+        // Textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glBindVertexArray(VAO);
         glPolygonMode(GL_FRONT_AND_BACK,
                       GL_FILL); // Draw lines. GL_LINE / GL_FILL
