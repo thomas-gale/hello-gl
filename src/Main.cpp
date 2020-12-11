@@ -113,7 +113,7 @@ int main() {
 
         // Move X over time
         float timeValue = glfwGetTime();
-        ourShader.setFloat("movX", std::sin(timeValue)/2.0f);
+        ourShader.setFloat("mov", std::sin(timeValue)/2.0f);
 
         // Draw stuff.
         glBindVertexArray(VAO);
