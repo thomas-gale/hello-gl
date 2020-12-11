@@ -176,13 +176,23 @@ int main() {
         // Enable shader
         ourShader.use();
 
-        // Animated transform
-        unsigned int transformLoc =
-            glGetUniformLocation(ourShader.ID, "transform");
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans =
-            glm::rotate(trans, float(glfwGetTime()), glm::vec3(0.0, 0.0, 1.0));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        // Model -> View -> Perspective 3D Transform
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, float(glfwGetTime()),
+                            glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        glm::mat4 projection = glm::perspective(
+            glm::degrees(35.f), float(width) / float(height), 0.1f, 100.0f);
+
+        unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        unsigned int projectionLoc =
+            glGetUniformLocation(ourShader.ID, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE,
+                           glm::value_ptr(projection));
 
         // Draw stuff.
         // Textures
