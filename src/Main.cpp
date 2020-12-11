@@ -163,15 +163,6 @@ int main() {
     glEnableVertexAttribArray(2);
 
     // Test GLM
-    glm::mat4 trans = glm::mat4(1.0f);
-    trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-
-    // Set base transform
-    ourShader.use();
-    unsigned int transformLoc =
-        glGetUniformLocation(ourShader.ID, "baseTransform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     // Render loop
     while (!glfwWindowShouldClose(window)) {
@@ -179,15 +170,19 @@ int main() {
         processInput(window);
 
         // Rendering...
-        glClearColor(0.4f, 0.2f, 0.2f, 1.0f);
+        glClearColor(0.2f, 0.1f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Enable shader
         ourShader.use();
 
-        // Move X over time
-        float timeValue = glfwGetTime();
-        ourShader.setFloat("mov", std::sin(timeValue) / 2.0f);
+        // Animated transform
+        unsigned int transformLoc =
+            glGetUniformLocation(ourShader.ID, "transform");
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans =
+            glm::rotate(trans, float(glfwGetTime()), glm::vec3(0.0, 0.0, 1.0));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         // Draw stuff.
         // Textures
