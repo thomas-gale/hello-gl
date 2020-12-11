@@ -111,13 +111,9 @@ int main() {
         // Enabled shader
         ourShader.use();
 
-        // Color change over time.
-        /*glUseProgram(shaderProgram);
+        // Move X over time
         float timeValue = glfwGetTime();
-        float greenValue = (std::sin(timeValue) / 2.0f) + 0.5f;
-        //int vertexColorLocation =
-            glGetUniformLocation(shaderProgram, "ourColor");
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);*/
+        ourShader.setFloat("movX", std::sin(timeValue)/2.0f);
 
         // Draw stuff.
         glBindVertexArray(VAO);
